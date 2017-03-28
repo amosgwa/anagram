@@ -19,7 +19,7 @@ db.once('open', function(callback) {
 // Declare the Schema for the database.
 // We are storing sorted anagram word : to list of words
 // Example : 
-// ader : [dear, read, dare]
+// ader : [ared, daer, dare, dear, read]
 var anagramSchema = mongoose.Schema({
   keyword: String,
   words: [String]

@@ -2,7 +2,8 @@
 var express = require('express')
 var app = express()
 var util = require('util');
-
+var Promise = require('promise');
+var createTimer = require('unitimer')
 
 var fs = require('fs')
 var engines = require('consolidate')
@@ -39,24 +40,41 @@ app.get('/generate', function (req, res) {
   //   .pipe(res)
 })
 
-var fileStream = fs.createReadStream('dictionary_short.txt', {encoding: 'utf8'});
-var outStream = fs.createWriteStream('log.txt', {flags: 'a'})
-var logStdout = process.stdout
+var fileStream = fs.createReadStream('dictionary.txt', {encoding: 'utf8'});
+// var outStream = fs.createWriteStream('log.txt', {flags: 'a'})
+// var logStdout = process.stdout
 
-console.log = function(d) { //
-  outStream.write(util.format(d) + '\n');
-  logStdout.write(util.format(d) + '\n');
-};
+// console.log = function(d) { //
+//   outStream.write(util.format(d) + '\n');
+//   logStdout.write(util.format(d) + '\n');
+// };
 
-console.error = console.log;
+// console.error = console.log;
 
 var prev = {}
 var buffer = ''
+
+var batch_bulkCommands = []
+
+var timer = createTimer().start()
 
 fileStream.on('data', function(d){
   //console.log(word)
   buffer += d.toString()
   processData()
+})
+
+fileStream.on('end', function(){
+  // Bulk write to the mongo.
+  console.log("Writing to mongo")
+  Promise.all(batch_bulkCommands)
+    .then(_=>{
+      console.log("Data successfully imported.")
+      console.log("Time :", timer.stop(), "ms")
+    })
+    .catch(err=>{
+      console.log(err)
+    })
 })
 
 function processData() {
@@ -72,48 +90,9 @@ function processData() {
     buffer = buffer.slice(pos+1)
   }
 
-  // Bulk write to the mongo.
-  console.log("Writing to mongo")
-  Anagram
-    .bulkWrite(batch_command)
-    .then(doc=>{
-      console.log(doc)
-    })
-    .catch(err=>{
-      //console.log(err)
-    })    
+  batch_bulkCommands.push(Anagram.bulkWrite(batch_command))
 }
 
-
-
-// var bulk_command = []
-
-// var write = {
-//   insertOne: {
-//     document: {
-//       keyword: "ader",
-//       words: ['read','dear','dare']
-//     }
-//   }
-// }
-
-// var update = {
-//   updateOne: {
-//     filter: {
-//       keyword: "ader"
-//     },
-//     update: {
-//       $push: {
-//         words: "hello"
-//       }
-//     }
-//   }  
-// }
-
-// bulk_command.push(write)
-// bulk_command.push(update)
-
-// Anagram.bulkWrite(bulk_command)
 
 function processLine(line) {
   let word = line.trim()
@@ -148,119 +127,8 @@ function processLine(line) {
     prev[sorted] = true
   }
 
-  console.log(command)
-
   return command
-
-
-  // if(prev.sorted) {
-  //   // Add the new word to the existing anagram.
-  //   Anagram
-  //     .update({
-  //       keyword : sorted,
-  //       $push : {
-  //         words : word
-  //       }
-  //     })
-  //     .then(_=>{
-  //       console.log("Existed "+sorted)
-  //     })
-  //     .catch(err=>{
-  //       console.log(err)
-  //     })
-  // } else {
-  //   // Add a new anagram. 
-  //   let anagram_draft = new Anagram({
-  //     keyword: sorted,
-  //     words : [word]
-  //   })
-  //   anagram_draft.save()
-  //     .then(_=>{
-  //       console.log("New "+sorted)
-  //       prev.sorted = true
-  //     })
-  //     .catch(err=> {
-  //       fileStream.pause()
-  //       console.log(err)
-  //     })
-  // }
 }
-
-// TODO: Optimize using stream.
-// fs.readFile('dictionary.txt', {encoding: 'utf8'}, function (err, data) {
-//   if (err) throw err
-
-//   var _data = data.split("\n")
-
-//   // var draft_linker = {}
-//   // var anagram_draft = []
-//   // Anagram.remove({})
-
-//   _data
-//     .reduce((prev, word) => {
-//       let sorted = word.split('').sort().join('')
-
-//       if(prev.sorted) {
-//         // Add the new word to existing anagram.
-//         // Anagram
-//         //   .update({
-//         //     keyword : sorted,
-//         //     $push : {
-//         //       words : word
-//         //     }
-//         //   })
-//       } else {
-//         // Add a new anagram. 
-//         let anagram_draft = new Anagram({
-//           keyword: sorted,
-//           words : [word]
-//         })
-//         anagram_draft.save()
-//         prev.sorted = true
-//       }
-
-//       return prev
-//     })
-
-//   // Generate batch of documents to be inserted into mongoDB.
-//   // Check db.js for the schema.
-// //   for(var i = 0; i < _data.length; i++) {
-// //     var curr_word = _data[i]
-// //     if(curr_word.length == 0) continue
-
-// //     // Sort the letters for anagram.
-// //     var sorted_word = curr_word.split('').sort().join('')
-
-// //     if(sorted_word in draft_linker) {
-// //       var idx = draft_linker[sorted_word]
-// //       anagram_draft[idx].words.push(curr_word)
-// //     } else {
-// //       var schema = {
-// //         "keyword" : sorted_word,
-// //         "words" : [curr_word]
-// //       }
-// //       anagram_draft.push(schema)
-// //       draft_linker[sorted_word] = anagram_draft.length - 1
-// //     }
-// //   }
-
-// // //  console.dir(anagram_draft[draft_linker["ader"]])
-
-// //   Anagram.insertMany(anagram_draft, function(err, doc){
-// //       console.dir("Success")
-// //       console.dir(doc)
-// //   })
-
-//   // var keywords = _data.map(v=> {
-//   //   var obj = {
-//   //     keyword: v.split('').sort().join('')
-//   //     words: []
-//   //   }
-    
-//   // })
-
-//   //console.log(keywords)
-// })
 
 app.get('/words', function(req, res){
   // Return the words.
