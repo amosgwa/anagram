@@ -1,0 +1,150 @@
+Server running at http://localhost:3000
+{ insertOne: { document: { keyword: 'A', words: 'A' } } }
+{ insertOne: { document: { keyword: 'a', words: 'a' } } }
+{ insertOne: { document: { keyword: 'aa', words: 'aa' } } }
+{ insertOne: { document: { keyword: 'aal', words: 'aal' } } }
+{ insertOne: { document: { keyword: 'aaiil', words: 'aalii' } } }
+{ insertOne: { document: { keyword: 'aam', words: 'aam' } } }
+{ insertOne: { document: { keyword: 'Aain', words: 'Aani' } } }
+{ insertOne: { document: { keyword: 'aaadkrrv', words: 'aardvark' } } }
+{ insertOne: { document: { keyword: 'aadflorw', words: 'aardwolf' } } }
+{ insertOne: { document: { keyword: 'Aanor', words: 'Aaron' } } }
+{ insertOne: { document: { keyword: 'Aacinor', words: 'Aaronic' } } }
+{ insertOne: { document: { keyword: 'Aaacilnor', words: 'Aaronical' } } }
+{ insertOne: { document: { keyword: 'Aaeinort', words: 'Aaronite' } } }
+{ insertOne: { document: { keyword: 'Aaciinort', words: 'Aaronitic' } } }
+{ insertOne: { document: { keyword: 'Aaru', words: 'Aaru' } } }
+{ insertOne: { document: { keyword: 'Ab', words: 'Ab' } } }
+{ insertOne: { document: { keyword: 'aab', words: 'aba' } } }
+{ insertOne: { document: { keyword: 'Aabbdeh', words: 'Ababdeh' } } }
+{ insertOne: { document: { keyword: 'Aaabbu', words: 'Ababua' } } }
+{ insertOne: { document: { keyword: 'aabc', words: 'abac' } } }
+{ insertOne: { document: { keyword: 'aaabc', words: 'abaca' } } }
+{ insertOne: { document: { keyword: 'aaabcet', words: 'abacate' } } }
+{ insertOne: { document: { keyword: 'aaabcy', words: 'abacay' } } }
+{ insertOne: { document: { keyword: 'aaabceint', words: 'abacinate' } } }
+{ insertOne: { document: { keyword: 'aaabciinnot', words: 'abacination' } } }
+{ insertOne: { document: { keyword: 'aabccissu', words: 'abaciscus' } } }
+{ insertOne: { document: { keyword: 'aabcist', words: 'abacist' } } }
+{ insertOne: { document: { keyword: 'aabck', words: 'aback' } } }
+{ insertOne: { document: { keyword: 'aaabcilnt', words: 'abactinal' } } }
+{ insertOne: { document: { keyword: 'aaabcillnty', words: 'abactinally' } } }
+{ insertOne: { document: { keyword: 'aabcinot', words: 'abaction' } } }
+{ insertOne: { document: { keyword: 'aabcort', words: 'abactor' } } }
+{ insertOne: { document: { keyword: 'aabclsuu', words: 'abaculus' } } }
+{ insertOne: { document: { keyword: 'aabcsu', words: 'abacus' } } }
+{ insertOne: { document: { keyword: 'Aabdeit', words: 'Abadite' } } }
+{ insertOne: { document: { keyword: 'aabff', words: 'abaff' } } }
+{ insertOne: { document: { keyword: 'aabft', words: 'abaft' } } }
+{ insertOne: { document: { keyword: 'aaabceins', words: 'abaisance' } } }
+{ insertOne: { document: { keyword: 'aabeirs', words: 'abaiser' } } }
+{ insertOne: { document: { keyword: 'aabdeiss', words: 'abaissed' } } }
+{ insertOne: { document: { keyword: 'aaabeeilnt', words: 'abalienate' } } }
+{ insertOne: { document: { keyword: 'aaabeiilnnot', words: 'abalienation' } } }
+{ insertOne: { document: { keyword: 'aabelno', words: 'abalone' } } }
+{ insertOne: { document: { keyword: 'Aaabm', words: 'Abama' } } }
+{ insertOne: { document: { keyword: 'aabeempr', words: 'abampere' } } }
+{ insertOne: { document: { keyword: 'aabdnno', words: 'abandon' } } }
+{ insertOne: { document: { keyword: 'aaabbdelnno', words: 'abandonable' } } }
+{ insertOne: { document: { keyword: 'aabddenno', words: 'abandoned' } } }
+{ insertOne: { document: { keyword: 'aabddelnnoy', words: 'abandonedly' } } }
+{ insertOne: { document: { keyword: 'aabdeenno', words: 'abandonee' } } }
+{ insertOne: { document: { keyword: 'aabdennor', words: 'abandoner' } } }
+{ insertOne: { document: { keyword: 'aabdemnnnot', words: 'abandonment' } } }
+{ insertOne: { document: { keyword: 'Aabcin', words: 'Abanic' } } }
+{ insertOne: { document: { keyword: 'Aabenst', words: 'Abantes' } } }
+{ insertOne: { document: { keyword: 'aabinopstt', words: 'abaptiston' } } }
+{ insertOne: { document: { keyword: 'Aaabbmor', words: 'Abarambo' } } }
+{ insertOne: { document: { keyword: 'Aabirs', words: 'Abaris' } } }
+{ insertOne: { document: { keyword: 'aabhiorrsst', words: 'abarthrosis' } } }
+{ insertOne: { document: { keyword: 'aaabcilrrtu', words: 'abarticular' } } }
+Writing to mongo
+(node:48227) DeprecationWarning: Mongoose: mpromise (mongoose's default promise library) is deprecated, plug in your own promise library instead: http://mongoosejs.com/docs/promises.html
+db connected
+BulkWriteResult {
+  ok: [Getter],
+  nInserted: [Getter],
+  nUpserted: [Getter],
+  nMatched: [Getter],
+  nModified: [Getter],
+  nRemoved: [Getter],
+  getInsertedIds: [Function],
+  getUpsertedIds: [Function],
+  getUpsertedIdAt: [Function],
+  getRawResponse: [Function],
+  hasWriteErrors: [Function],
+  getWriteErrorCount: [Function],
+  getWriteErrorAt: [Function],
+  getWriteErrors: [Function],
+  getLastOp: [Function],
+  getWriteConcernError: [Function],
+  toJSON: [Function],
+  toString: [Function],
+  isOk: [Function],
+  insertedCount: 59,
+  matchedCount: 0,
+  modifiedCount: 0,
+  deletedCount: 0,
+  upsertedCount: 0,
+  upsertedIds: {},
+  insertedIds: 
+   { '0': 58daae9c4b6505bc632bf281,
+     '1': 58daae9c4b6505bc632bf282,
+     '2': 58daae9c4b6505bc632bf283,
+     '3': 58daae9c4b6505bc632bf284,
+     '4': 58daae9c4b6505bc632bf285,
+     '5': 58daae9c4b6505bc632bf286,
+     '6': 58daae9c4b6505bc632bf287,
+     '7': 58daae9c4b6505bc632bf288,
+     '8': 58daae9c4b6505bc632bf289,
+     '9': 58daae9c4b6505bc632bf28a,
+     '10': 58daae9c4b6505bc632bf28b,
+     '11': 58daae9c4b6505bc632bf28c,
+     '12': 58daae9c4b6505bc632bf28d,
+     '13': 58daae9c4b6505bc632bf28e,
+     '14': 58daae9c4b6505bc632bf28f,
+     '15': 58daae9c4b6505bc632bf290,
+     '16': 58daae9c4b6505bc632bf291,
+     '17': 58daae9c4b6505bc632bf292,
+     '18': 58daae9c4b6505bc632bf293,
+     '19': 58daae9c4b6505bc632bf294,
+     '20': 58daae9c4b6505bc632bf295,
+     '21': 58daae9c4b6505bc632bf296,
+     '22': 58daae9c4b6505bc632bf297,
+     '23': 58daae9c4b6505bc632bf298,
+     '24': 58daae9c4b6505bc632bf299,
+     '25': 58daae9c4b6505bc632bf29a,
+     '26': 58daae9c4b6505bc632bf29b,
+     '27': 58daae9c4b6505bc632bf29c,
+     '28': 58daae9c4b6505bc632bf29d,
+     '29': 58daae9c4b6505bc632bf29e,
+     '30': 58daae9c4b6505bc632bf29f,
+     '31': 58daae9c4b6505bc632bf2a0,
+     '32': 58daae9c4b6505bc632bf2a1,
+     '33': 58daae9c4b6505bc632bf2a2,
+     '34': 58daae9c4b6505bc632bf2a3,
+     '35': 58daae9c4b6505bc632bf2a4,
+     '36': 58daae9c4b6505bc632bf2a5,
+     '37': 58daae9c4b6505bc632bf2a6,
+     '38': 58daae9c4b6505bc632bf2a7,
+     '39': 58daae9c4b6505bc632bf2a8,
+     '40': 58daae9c4b6505bc632bf2a9,
+     '41': 58daae9c4b6505bc632bf2aa,
+     '42': 58daae9c4b6505bc632bf2ab,
+     '43': 58daae9c4b6505bc632bf2ac,
+     '44': 58daae9c4b6505bc632bf2ad,
+     '45': 58daae9c4b6505bc632bf2ae,
+     '46': 58daae9c4b6505bc632bf2af,
+     '47': 58daae9c4b6505bc632bf2b0,
+     '48': 58daae9c4b6505bc632bf2b1,
+     '49': 58daae9c4b6505bc632bf2b2,
+     '50': 58daae9c4b6505bc632bf2b3,
+     '51': 58daae9c4b6505bc632bf2b4,
+     '52': 58daae9c4b6505bc632bf2b5,
+     '53': 58daae9c4b6505bc632bf2b6,
+     '54': 58daae9c4b6505bc632bf2b7,
+     '55': 58daae9c4b6505bc632bf2b8,
+     '56': 58daae9c4b6505bc632bf2b9,
+     '57': 58daae9c4b6505bc632bf2ba,
+     '58': 58daae9c4b6505bc632bf2bb },
+  n: 59 }

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Anagram</title>
+  <style>
+    * {
+      font-family: Helvetica, Arial, sans-serif;
+    }
+
+    textarea {
+      height: 200px;
+      width: 500px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Anagrams</h1>
+  <button onclick="generate()">Generate DB</button> <span> Generate a database of anagram from dictionary.txt</span>
+  <br>
+  <button onclick="reset()">Reset DB</button> <span> Drop the database</span>
+  <br>
+  <a href="words"><button>Show all words</button></a>
+  <h2>Result</h2>
+  <textarea id="result"></textarea>
+</body>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>
+  function generate() {
+    // Generate the anagrams from dictionary.txt.
+    $.ajax('/generate',{
+      method: 'GET',
+      data: {
+      }, 
+      success: function(data) {
+        console.log("Data",data)
+        //var result = data.replace(/\r?\n/g, '\r\n');
+        $('#result').val(JSON.stringify(data))
+        //location.reload()
+      }
+    })
+  }
+
+  function reset() {
+    $.ajax('/words', {
+      method: 'DELETE',
+      data: {
+      },
+      error: function(err) {
+        console.log(err)
+        alert('Deletion error')
+      },
+      success: function(res) {
+        console.log(res)
+        $('#result').val('')
+      }
+    })
+  }
+</script>
+</html>

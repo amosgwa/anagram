@@ -1,0 +1,30 @@
+{
+  "name": "anagram",
+  "version": "1.0.0",
+  "description": "Ibotta Dev Project\r =========",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amosgwa/anagram.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amosgwa/anagram/issues"
+  },
+  "homepage": "https://github.com/amosgwa/anagram#readme",
+  "dependencies": {
+    "JSONStream": "^1.3.1",
+    "consolidate": "^0.14.5",
+    "express": "^4.15.2",
+    "handlebars": "^4.0.6",
+    "mongoose": "^4.9.2",
+    "nodemon": "^1.11.0"
+  }
+}
