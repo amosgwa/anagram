@@ -16,7 +16,7 @@
 </head>
 <body>
   <h1>Anagrams</h1>
-  <button onclick="generate()">Generate DB</button> <span> Generate a database of anagram from dictionary.txt</span>
+  <button onclick="generate()">Generate DB (Not reccommended)</button> <span> Re-Generate a database of anagram from dictionary.txt</span>
   <br>
   <button onclick="reset()">Reset DB</button> <span> Drop the database</span>
   <br>
@@ -30,7 +30,7 @@
   function generate() {
     // Generate the anagrams from dictionary.txt.
     $.ajax('/generate',{
-      method: 'PUT',
+      method: 'GET',
       data: {
       }, 
       success: function(data) {
