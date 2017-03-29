@@ -1,0 +1,20 @@
+// Count the arrays
+db.getCollection('anagrams').aggregate({ $group: { _id: null, sum : {$sum: { $size: "$words" }} } })
+
+// Look for arrays bigger than 7
+db.getCollection('anagrams').find({ 'words.7': {$exists: true} })
+
+// Count the words after unwinding
+db.getCollection('anagrams').aggregate([
+{"$unwind" : "$words"},
+{$group : {
+    _id : null,
+    count: {$sum : 1}
+    }}
+])
+
+db.anagrams.updateOne(
+  {keyword: "aber"},
+  {$push : {words: "bear"}},
+  {upsert: true}
+)

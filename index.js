@@ -2,8 +2,10 @@
 var express = require('express')
 var app = express()
 var util = require('util');
-var Promise = require('promise');
-var createTimer = require('unitimer')
+var sqlite3 = require('sqlite3').verbose();
+var sql_db = new sqlite3.Database('db.sql');  
+
+// var createTimer = require('unitimer')
 
 var fs = require('fs')
 var engines = require('consolidate')
@@ -21,26 +23,11 @@ app.get('/', function (req, res) {
   res.render('index.hbs')
 })
 
-app.get('/generate', function (req, res) {
+app.put('/generate', function (req, res) {
   // Create a collection.
-  var anagram = new Anagram({
-    keyword: 'read',
-    words: ['dare', 'dear']
-  });
-
-  // anagram
-  //   .save()
-  //   .then(rec => res.send(rec))
-  //   .catch(err => res.send(err))
-  
-
-  // var readable = fs.createReadStream('dictionary_short.txt')
-  // readable
-  //   .pipe(addAnagram)
-  //   .pipe(res)
+  console.log("Clicked generate")
 })
 
-var fileStream = fs.createReadStream('dictionary.txt', {encoding: 'utf8'});
 // var outStream = fs.createWriteStream('log.txt', {flags: 'a'})
 // var logStdout = process.stdout
 
@@ -51,84 +38,155 @@ var fileStream = fs.createReadStream('dictionary.txt', {encoding: 'utf8'});
 
 // console.error = console.log;
 
-var prev = {}
-var buffer = ''
+// Reset the database.
+Anagram.remove({})
+  .then(_=> {
+    console.log("Database is reset.")
+    //generateDatabase()
+  })
 
-var batch_bulkCommands = []
+generateDatabase()
 
-var timer = createTimer().start()
+function generateDatabase() {
+  //var timer = createTimer().start()
+  var fileStream = fs.createReadStream('dictionary.txt', {encoding: 'utf8'});
+  var buffer = ''
 
-fileStream.on('data', function(d){
-  //console.log(word)
-  buffer += d.toString()
-  processData()
-})
+  var prev = {}
 
-fileStream.on('end', function(){
-  // Bulk write to the mongo.
-  console.log("Writing to mongo")
-  Promise.all(batch_bulkCommands)
-    .then(_=>{
-      console.log("Data successfully imported.")
-      console.log("Time :", timer.stop(), "ms")
-    })
-    .catch(err=>{
-      console.log(err)
-    })
-})
+  console.log("Generating database from dictionary.txt")
 
-function processData() {
-  var pos;
-  var batch_command = []
-  // Keep going util a new line.
-  while((pos = buffer.indexOf('\n')) >= 0) {
-    if(pos == 0) {
-      buf = buf.slice(1)
-      continue
+  var batch_bulkCommands = []
+  
+  create_table()
+  // Stream the file.
+  fileStream.on('data', function(d){
+    //console.log("Reading file...")
+    buffer += d.toString()
+    processData()
+  })
+  // Bulk write to the mongodb.
+  fileStream.on('end', function(){
+    console.log("Done Reading")
+    // sql_db.close();
+    // Promise.all(batch_bulkCommands)
+    //   .then(_=>{
+    //     console.log("Data successfully imported.")
+    //     console.log("Time :", timer.stop(), "ms")
+    //   })
+    //   .catch(err=>{
+    //     console.log(err)
+    //   })
+  })
+  
+  function processData() {
+    var pos;
+    var batch_command = []
+
+    var words = []
+
+    // Keep going until a new line.
+    while((pos = buffer.indexOf('\n')) >= 0) {
+      if(pos == 0) {
+        buf = buf.slice(1)
+        continue
+      }
+      //batch_command.push(processLine(buffer.slice(0, pos)))
+      words.push(buffer.slice(0, pos).trim())
+      buffer = buffer.slice(pos+1)
     }
-    batch_command.push(processLine(buffer.slice(0, pos)))
-    buffer = buffer.slice(pos+1)
+    //ASK HANSEL : How do I execute only at the promise. Not here.
+    //batch_bulkCommands.push(Anagram.bulkWrite(batch_command))
+    // Anagram.bulkWrite(batch_command)
+    //   .then()
+    //   .catch(err=>{
+    //     console.log(err)
+    //     res.send("error")
+    //   })
+    sql_db_run(words)
   }
+  // Create command for each word.
+  function processLine(line) {
+    let word = line.trim()
+    console.log(word)
+    // console.log("word " + word)
+    let sorted = word.split('').sort().join('')
 
-  batch_bulkCommands.push(Anagram.bulkWrite(batch_command))
-}
+    var command = {}
 
-
-function processLine(line) {
-  let word = line.trim()
-  // console.log("word " + word)
-  let sorted = word.split('').sort().join('')
-
-  var command = {}
-
-  if(prev[sorted]) {
-    command = {
-      updateOne: {
-        filter: {
-          keyword: sorted
-        },
-        update: {
-          $push: {
-            words: word
-          }
-        }
-      }  
-    }
-  } else {
-    command = {
-      insertOne: {
-        document: {
-          keyword: sorted,
-          words: word
+    if(prev[sorted]) {
+      command = {
+        updateOne: {
+          filter: {
+            keyword: sorted
+          },
+          update: {
+            $push: {
+              words: word
+            }
+          }  
         }
       }
-    } 
+    } else {
+      command = {
+        insertOne: {
+          document: {
+            keyword: sorted,
+            words: [word]
+          }
+        }
+      } 
+      prev[sorted] = true
+    }
 
-    prev[sorted] = true
+    command = {
+        updateOne: {
+          filter: {
+            keyword: sorted
+          },
+          update: {
+            $push: {
+              words: word
+            }
+          },
+          upsert: true  
+        }
+      }
+
+    if(sorted == "aber" || sorted == "ader" || word == "Zyzzogeton") {
+      //console.log(word, prev[sorted])
+      //console.log(command)
+    }
+    return command
   }
-
-  return command
 }
+
+function create_table() {
+  sql_db.run("DROP TABLE IF EXISTS anagram")
+  sql_db.run("CREATE TABLE anagram (keyword TEXT, word TEXT)")
+}
+
+function sql_db_run(words) {
+  sql_db.parallelize(function() {
+    
+    var stmt = sql_db.prepare("INSERT INTO anagram VALUES (?,?)");
+
+    words.forEach(function(w){
+      stmt.run(w.split("").sort().join(''), w)
+    })
+    stmt.finalize();
+  });
+}
+
+function show_table() {
+  sql_db.each("SELECT rowid AS id, keyword, word FROM anagram", (err, row) => {
+      if(err) console.error(err)
+      else console.log(row.id, row.keyword, row.word);
+  });
+}
+
+// sql_db_run()
+
 
 app.get('/words', function(req, res){
   // Return the words.

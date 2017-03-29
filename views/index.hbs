@@ -30,13 +30,13 @@
   function generate() {
     // Generate the anagrams from dictionary.txt.
     $.ajax('/generate',{
-      method: 'GET',
+      method: 'PUT',
       data: {
       }, 
       success: function(data) {
         console.log("Data",data)
         //var result = data.replace(/\r?\n/g, '\r\n');
-        $('#result').val(JSON.stringify(data))
+        $('#result').val(data)
         //location.reload()
       }
     })
