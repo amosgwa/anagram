@@ -1,6 +1,5 @@
 // Imports
 var express = require('express')
-var util = require('util');
 var bodyParser = require('body-parser')
 
 var db = require('./db')
@@ -9,6 +8,8 @@ var engines = require('consolidate')
 var jsonParser = bodyParser.json()
 
 var app = express()
+
+app.use(express.static('public'))
 
 // Set the default engine for rendering template.
 app.engine('hbs', engines.handlebars)
@@ -25,7 +26,7 @@ app.get('/', function (req, res) {
 app.get('/generate', function (req, res) {
   // Create a collection.
   console.log("Clicked generate")
-  db.generateDatabase('dictionary.txt',res)
+  db.generateDatabase('dictionary_short.txt',res)
 })
 
 // This is a hack. Trying to make the 
@@ -39,8 +40,28 @@ app.use('/words.json',(req, res, next) => {
 app.post('/words.json', jsonParser, function (req, res) {
   // Return the words.
   var words = req.body["words"]
-  console.log(words)
-  db.addAnagrams(words, res)
+  // Clean up the data.
+  words = words.map((v) => v.trim())
+  // Need at least one word.
+  if(words.length > 0) {
+    db.addAnagrams(words, res)
+  } else {
+    res.status(400).send({err:"Need at least one word."})
+  }  
+})
+
+// Check if the words are anagrams of themselves.
+app.post('/anagrams/check.json', jsonParser, function (req, res) {
+  // Return the words.
+  var words = req.body["words"]
+  var sorted_words = words.map((v)=> v.trim().split("").sort().join('').toLowerCase())
+
+  if(sorted_words.length > 1) {
+    var are_anagrams = sorted_words.every((v) => v === sorted_words[0])
+    res.status(200).send({"are_anagrams": are_anagrams})
+  } else {
+    res.status(400).send({"err":"Needs more than one word."})
+  }
 })
 
 // Remove all words from the database. NO TURNING BACK. :S
@@ -49,17 +70,26 @@ app.delete('/words.json', (req,res)=>{
 })
 
 // Retrieve the anagrams of a given word.
+// This will NOT fail if no anagram is found.
 // The limit query from url can present or not.
 app.get('/anagrams/:word.json', (req, res)=>{
   var word = req.params.word.trim()
   var limit = req.query["limit"]
-  db.getAnagrams(word, limit, res)
+  var filter_proper = req.query["filter_proper"] // This is either true or false(string)
+  db.getAnagrams(word, limit, filter_proper, res)
 })
 
-// Delete a particuar word from the database.
+// Delete a particular word from the database.
 app.delete('/words/:word.json', (req,res)=>{
   var word = req.params.word.trim()
-  db.deleteWord(word,res)
+  var delete_self_anagrams = req.query["delete_self_anagrams"] // This is either true or false(string)
+  console.log(req.query)
+  db.deleteWord(word, delete_self_anagrams, res)
+})
+
+// Returns count of words in the corpus and min/max/median/average word length.
+app.get('/anagrams/stats', (req,res) => {
+  db.getStats(res)
 })
 
 // Run the app on port 3000.

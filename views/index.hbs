@@ -3,59 +3,372 @@
 <head>
   <meta charset="UTF-8">
   <title>Anagram</title>
+  
   <style>
-    * {
-      font-family: Helvetica, Arial, sans-serif;
+    @import url('https://fonts.googleapis.com/css?family=Lato:300,400');
+    html {
+      font-size: 16px;
+    }
+    body {
+      font-family: 'Lato', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
     }
 
     textarea {
       height: 200px;
-      width: 500px;
+      width: 100%;
     }
+
+    #wrapper {
+      width : 560px;
+      margin : 0 auto;
+    }
+
+    #result {
+      font-size: 12px;
+      font-family: monospace;
+      border: 1px dashed #ccc;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    #result-area {
+      text-align: right;
+    }
+
+    #spinner {
+      margin-left: 10px;
+      display: none;
+    }
+
+    #result-clear{
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    #result-clear:hover{
+      text-decoration: underline;
+    }
+
   </style>
+  <script src="/js/jquery-3.2.0.min.js"></script>
+  <link rel="stylesheet" href="/css/uikit.css" />
+  <script src="/js/uikit.min.js"></script>
+  <script src="/js/uikit-icons.min.js"></script>
 </head>
 <body>
-  <h1>Anagrams</h1>
-  <button onclick="generate()">Generate DB (Not reccommended)</button> <span> Re-Generate a database of anagram from dictionary.txt</span>
-  <br>
-  <button onclick="reset()">Reset DB</button> <span> Drop the database</span>
-  <br>
-  <a href="words"><button>Show all words</button></a>
-  <h2>Result</h2>
-  <textarea id="result"></textarea>
+  <div id="wrapper" class="uk-margin-xlarge-top">
+      <div class="uk-card uk-card-default uk-padding-small">
+        <h1>an·a·gram</h1>
+        <div>/ˈanəˌɡram/</div>
+        <div><i>noun</i></div>
+        <div class="uk-padding-small uk-padding-remove-right">a word, phrase, or name formed by rearranging the letters of another, such as <i>cinema</i>, formed from <i>iceman</i>.</div>
+      </div>
+
+      <div uk-grid class="uk-margin-large-top">
+        <div class="uk-width-auto@m">
+          <ul class="uk-tab-left" uk-tab="connect: #component-tab-left; animation: uk-animation-fade, uk-animation-slide-bottom-small">
+            <li><a href="#">Search Anagram</a></li>
+            <li><a href="#">Check Anagram</a></li>
+            <li><a href="#">Add Anagram</a></li>
+            <li><a href="#">Delete Anagram</a></li>
+            <li><a href="#">Get Stats</a></li>
+            <li><a href="#">Reset DB</a></li>
+            <li><a href="#">Rbuild DB</a></li>
+          </ul>
+        </div>
+        <div class="uk-width-expand@m">
+          <ul id="component-tab-left" class="uk-switcher">
+            <li>
+              <div>
+                <p>Type in a word to find its anagrams and limit for the number of anagrams.</p>
+                <form id='search_anagram' >
+                  <input class="uk-input uk-width-4-5" id="search_anagram-input" type="text" placeholder="ex. read">
+                  <input class="uk-input uk-width-1-6" id="search_limit-input" type="text" placeholder="limit">
+                  <p><input class="uk-checkbox" type="checkbox" id="filter-proper-nouns"> filter proper nouns</p>
+                  <p class="uk-text-muted"><i>A word is not its own anagram.</i></p>
+                  <button class="uk-button uk-button-primary uk-width-1-1">Find Anagram</button>
+                </form>
+              </div>
+            </li>
+            <li>
+            <div>
+              <p>Type in the words to check if they are anagram of each other.</p>
+                <form id='check_anagram' >
+                  <input class="uk-input" id="check_anagram-input" type="text" placeholder="ex. dare, read, dear...">
+                  <button class="uk-button uk-button-secondary uk-margin-small-top uk-width-1-1">Check</button>
+                </form>
+              </div>
+            </li>
+            <li>
+              <div>
+                <p>Type in the word(s) to add to the DB.</p>
+                <form id='add_anagram' >
+                  <input class="uk-input" id="add_anagram-input" type="text" placeholder="ex. read, dear, bear...">
+                  <p class="uk-text-muted"><i>Duplicates will be ignored.</i></p>
+                  <button class="uk-button uk-button-primary uk-width-1-1">Add</button>
+                </form>
+              </div>
+            </li>
+            <li>
+               <div>
+                <p>Type in a word to delete from the DB. </p>
+                <form id='delete_anagram'>
+                  <input class="uk-input" id="delete_anagram-input" type="text" placeholder="ex. bear">
+                  <p><input class="uk-checkbox" type="checkbox" id="delete-self-anagrams"> also delete its anagrams</p>
+                  <p class="uk-text-muted"><i>Deletion executes regardless of the presence of the word.</i></p>
+                  <button class="uk-button uk-button-danger uk-width-1-1">Delete</button>
+                </form>
+              </div>
+            </li>
+            <li>
+               <div>
+                <p>Generate the statistics of the DB.</p>
+                  <p class="uk-text-muted"><i>statistics include wrod count, and min/max/median/average of the word length.</i></p>
+                  <button class="uk-button uk-button-primary uk-width-1-1" onclick="getStats()">Get Stats</button>
+              </div>
+            </li>
+            <li>
+              <div>
+                <p>The database will be completely wiped out. You can rebuild the DB if you want to test further.</i></p>
+                <p class="uk-text-muted"><i>No turning back. :> </i></p>                
+                <button class="uk-button uk-button-default uk-button-danger uk-width-1-1" onclick="reset()">Reset DB</button>
+              </div>
+            </li>
+            <li>
+              <div>
+                <p>The database is already generated in <i><b>db.sql</b></i>. Rebuilding from <i><b>dictionary.txt</b></i> will reset everything. Data ingestion takes about 5-6 minutes depending on the speed of the computer.</p>
+                <p class="uk-text-muted"><i>If you don't want to wait, rename <b>db_backup.sql</b> to <b>db.sql</b>.</i></p>                
+                <button class="uk-button uk-button-default uk-button-danger uk-width-1-1" onclick="generate()">Rebuild DB</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <hr>
+      <div class="uk-margin-small-top">
+        <h3>log<span uk-spinner="ratio: 0.8" id="spinner"></span></h3>
+        <div id="result-area">
+          <textarea disabled id="result"></textarea>
+          <div><span id="result-clear">x clear all</span></div>
+        </div>          
+      </div>
+  </div>
 </body>
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script>
-  function generate() {
+  $(document).ready(()=> {
+
+    var log_ready = "Ready\r\n"
+    $('#result').val(log_ready)  
+
+    // Search
+    $('#search_anagram').on('submit', (e)=>{
+      e.preventDefault()
+
+      var word = $('#search_anagram-input').val()
+      var filter_proper = $('#filter-proper-nouns').prop('checked')
+      var limit = $('#search_limit-input').val()
+
+      //TODO : need to add limit validation.
+      if( word.length == 0){
+        showPopup("Please enter a word.")
+      } else {
+        toggleSpinner()
+
+        var url = `/anagrams/${word}.json`
+        var params = `filter_proper=${filter_proper}&limit=${limit}`
+
+        $.ajax(url, {
+          method: 'GET',
+          data: params,
+          error(xhr) {
+            toggleSpinner()
+            parseResult(xhr.responseText, xhr)
+          },
+          success(data, status, xhr) {
+            toggleSpinner()
+            parseResult(data,xhr)
+          }
+        })
+      }
+    })
+
+    // Add
+    $('#add_anagram').on('submit', (e)=>{
+      e.preventDefault()
+
+      var words = $('#add_anagram-input').val().split(",").filter((v) => v.length > 0)
+      words = words.map((v) => v.trim())
+      
+      var words_json = {
+        "words" : words
+      }
+      if( words.length == 0 ){
+        showPopup("Please enter at least a word.")
+      } else {
+        toggleSpinner()
+
+        var url = `/words.json`
+        $.ajax(url, {
+          method: 'POST',
+          contentType: 'application/json; charset=utf-8',
+          dataType: "json",
+          data: JSON.stringify(words_json),
+          error(xhr) {
+            toggleSpinner()
+            parseResult(xhr.responseText, xhr)
+          },
+          success(data, status, xhr) {
+            toggleSpinner()
+            parseResult(data,xhr)
+          }
+        })
+      }
+    })
+    
+    // Delete
+    $('#delete_anagram').on('submit', (e)=>{
+      e.preventDefault()
+
+      var word = $('#delete_anagram-input').val().trim()
+      var delete_self_anagrams = $('#delete-self-anagrams').prop('checked')
+
+      if( word.length == 0 ){
+        showPopup("Please enter a word.")
+      } else {
+        toggleSpinner()
+
+        var url = `/words/${word}.json?` + $.param({"delete_self_anagrams": delete_self_anagrams})
+
+        $.ajax(url, {
+          method: 'DELETE',
+          error(xhr) {
+            toggleSpinner()
+            parseResult(xhr.responseText, xhr)
+          },
+          success(data, status, xhr) {
+            toggleSpinner()
+            parseResult(data,xhr)
+          }
+        })
+      }
+    })
+
+     // Check anagram
+    $('#check_anagram').on('submit', (e)=>{
+      e.preventDefault()
+
+      var words = $('#check_anagram-input').val().split(",").filter((v) => v.length > 0)
+      words = words.map((v) => v.trim())
+      
+      var words_json = {
+        "words" : words
+      }
+
+      if( words.length == 0 ){
+        showPopup("Please enter at least two words.")
+      } else {
+        toggleSpinner()
+
+        var url = `/anagrams/check.json`
+        $.ajax(url, {
+          method: 'POST',
+          contentType: 'application/json; charset=utf-8',
+          dataType: "json",
+          data: JSON.stringify(words_json),
+          error(xhr) {
+            toggleSpinner()
+            parseResult(xhr.responseText, xhr)
+          },
+          success(data, status, xhr) {
+            toggleSpinner()
+            parseResult(data,xhr)
+          }
+        })
+      }
+    })
+
+    $("#result-clear").on('click', (e) => {
+      $('#result').val("") 
+    })
+  });
+
+  function reset() {
     // Generate the anagrams from dictionary.txt.
-    $.ajax('/generate',{
-      method: 'GET',
-      data: {
-      }, 
-      success: function(data) {
-        console.log("Data",data)
-        //var result = data.replace(/\r?\n/g, '\r\n');
-        $('#result').val(data)
-        //location.reload()
+    toggleSpinner()
+    $.ajax('/words.json',{
+      method: 'DELETE',
+      error(xhr) {
+        toggleSpinner()
+        parseResult(xhr.responseText, xhr)
+      },
+      success(data, status, xhr) {
+        toggleSpinner()
+        parseResult(xhr.statusText,xhr)
       }
     })
   }
 
-  function reset() {
-    $.ajax('/words', {
-      method: 'DELETE',
+  function generate() {
+    // Generate the anagrams from dictionary.txt.
+    toggleSpinner()
+    $.ajax('/generate',{
+      method: 'GET',
       data: {
+      }, 
+      error(xhr) {
+        toggleSpinner()
+        parseResult(xhr.responseText, xhr)
       },
-      error: function(err) {
-        console.log(err)
-        alert('Deletion error')
-      },
-      success: function(res) {
-        console.log(res)
-        $('#result').val('')
+      success(data, status, xhr) {
+        toggleSpinner()
+        parseResult(data,xhr)
       }
     })
   }
+
+  function getStats() {
+    // Generate the anagrams from dictionary.txt.
+    toggleSpinner()
+    $.ajax('/anagrams/stats',{
+      method: 'GET',
+      data: {
+      }, 
+      error(xhr) {
+        toggleSpinner()
+        parseResult(xhr.responseText, xhr)
+      },
+      success(data, status, xhr) {
+        toggleSpinner()
+        parseResult(data,xhr)
+      }
+    })
+  }
+
+  // Utility functions.
+  function parseResult(data, xhr){
+    
+    var result = `Status code : ${xhr.status} \r\n`
+    result += `Status text : ${xhr.statusText} \r\n`
+    result += JSON.stringify(data)
+
+    var line = "\r\n-------------------------------------------------------------\r\n"
+    var date = new Date()
+    var log = date + "\r\n" + result + "\r\n" + line + "\r\n" + $('#result').val()
+
+    $('#result').val(log)  
+  }
+
+  function toggleSpinner(){
+    $('#spinner').toggle()  
+  }
+
+  function showPopup(msg){
+    UIkit.notification(msg, {pos:'bottom-center', status:'danger'});
+  }
+
 </script>
 </html>
