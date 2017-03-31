@@ -100,7 +100,7 @@ function findAnagrams(word, limit, filter_proper, res) {
     query += ` LIMIT ${limit}`
   }
 
-  console.log(query)
+  //console.log(query)
 
   // Open database.
   sql_db = new sqlite3.Database('db.sql', sqlite3.OPEN_READWRITE)

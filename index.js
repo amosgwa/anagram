@@ -85,7 +85,6 @@ app.get('/anagrams/:word.json', (req, res)=>{
   var limit = req.query["limit"] || ''
   
   var filter_proper = req.query["filter_proper"] || 'false' // This is either true or false(string)
-  console.log(limit, filter_proper)
   db.findAnagrams(word, limit, filter_proper, res)
 })
 
