@@ -6,6 +6,8 @@ The project is to build an API that allows fast searches for [anagrams](https://
 
 ---
 # Running the app
+The app runs on node server, and you will need to install both [node and npm](https://docs.npmjs.com/getting-started/installing-node).
+
 - First install the dependencies
   ```
   npm install
@@ -13,6 +15,10 @@ The project is to build an API that allows fast searches for [anagrams](https://
 - Run the app
   ```
   npm start
+  ```
+- Testing in the broswer
+  ```
+  http://localhost:300
   ```
 ---
 # API End Points
@@ -109,7 +115,7 @@ The following are the implemented End Points
 
 # Tests
 
-We have provided a suite of tests to help as you develop the API. To run the tests you must have Ruby installed ([docs](https://www.ruby-lang.org/en/documentation/installation/)):
+Running the test will reset the database *`db.sql`* If you would like to test with contents from *`dictionary.txt`* on the browser `http://localhost:3000`, make sure the *db.sql* is replaced with *db_backup.sql* You can also generate the database from *dicationary.txt* by using this endpoint `GET /generate`. It may take 5 to 10 minutes depending on the speed of the computer. To run the tests you must have Ruby installed ([docs](https://www.ruby-lang.org/en/documentation/installation/)):
 
 ```{bash}
 ruby anagram_test.rb
@@ -121,14 +127,20 @@ If you are running your server somewhere other than localhost port 3000, you can
 ruby anagram_test.rb -h
 ```
 
-# Features
-
-Optionally, you can provide documentation that is useful to consumers and/or maintainers of the API.
-
-Suggestions for documentation topics include:
+# Feedbacks
 
 - Features you think would be useful to add to the API
+  - It would be a nice feature to add an endpoint that allows to search for anagram with different length.
+  - It would also be cool to get anagrams of multiple words.
 - Implementation details (which data store you used, etc.)
-- Limits on the length of words that can be stored or limits on the number of results that will be returned
+  - I am using sqllite. I was using MongoDB, and it was a nightmare. Nodejs was yelling because it couldn't handle the size from data ingestion. Then, MongoDB was also very slow with the data ingestion. I use sqllite because I am already familiar with it, and it doesn't need its own server like MongoDB. It's definitely a plus for the scope of this project.
 - Any edge cases you find while working on the project
+  - There were a lot of edge cases (I should have documented when I was developing it). Some of the ones that I remember are :
+    - User entering proper nouns (Do I save it lowercase or uppercase, and should it show for an anagram with all lowercase)
+    - User requesting with trailing spaces for word
+    - User requesting to delete a proper noun and all of its anagrams (It was not deleting properly because I was not lowercasing the word before sorting them.)
+    - Running SQL commands with JavaScript is really tedious because JavaScript engine runs on one thread, and it assigns the task to another thread asynchronously. Synchronizing the result from the queries and returning the result needed extra care.
 - Design overview and trade-offs you considered
+  - I personally believe that mongo would have been a lot faster for searching in large data. We are dealing with a lot of strings, and I think Mongo is good for that. But, it was a pain to get it up and running. So yeah, finishing the project with less pain in timely manner is much more important here.
+  - I am using Nodejs and Express because I wanted to learn something new. It took me about 12 videos on Nodejs and Express, and tons of googling. I learned a lot. It was fun!
+  - I also built a web UI to run the test from the client side. I just wanted to see how it behaves from the client side. It also helped me see from the user perspective, and find bugs.
