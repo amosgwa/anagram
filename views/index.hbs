@@ -51,6 +51,23 @@
       text-decoration: underline;
     }
 
+    #screen {
+      position: absolute;
+      background-color: #fff;
+      height: 100%;
+      z-index: 999;
+      box-sizing: border-box;
+      width: 100%;
+      display: none;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    .reset-padding-left {
+      position: relative;
+      margin-left: 0px !important;
+    }
+
   </style>
   <script src="/js/jquery-3.2.0.min.js"></script>
   <link rel="stylesheet" href="/css/uikit.css" />
@@ -66,14 +83,25 @@
         <div class="uk-padding-small uk-padding-remove-right">a word, phrase, or name formed by rearranging the letters of another, such as <i>cinema</i>, formed from <i>iceman</i>.</div>
       </div>
 
-      <div uk-grid class="uk-margin-large-top">
+      <div uk-grid class="uk-margin-large-top reset-padding-left">
+        <div id="screen" class="uk-first-column uk-padding-small uk-card-default" style="">
+          <p>Yesterday is <i>history</i>.<br>
+            Tomorrow is a <i>mystery</i>.<br>
+            Today is a <i>gift</i>.<br>
+            That's why it's called <i><b>The Present</b></i>.<br>
+            -<i>Bil Keane</i><br><br>
+          I hope you are having a beautiful day. :)<br><br>
+          Please don't refresh or close the page. It may take 5 to 10 minutes.</p>
+        </div>
+
         <div class="uk-width-auto@m">
           <ul class="uk-tab-left" uk-tab="connect: #component-tab-left; animation: uk-animation-fade, uk-animation-slide-bottom-small">
             <li><a href="#">Search Anagram</a></li>
             <li><a href="#">Check Anagram</a></li>
             <li><a href="#">Add Anagram</a></li>
-            <li><a href="#">Delete Anagram</a></li>
+            <li><a href="#">Get Anagrams</a></li>
             <li><a href="#">Get Stats</a></li>
+            <li><a href="#">Delete Anagram</a></li>
             <li><a href="#">Reset DB</a></li>
             <li><a href="#">Rbuild DB</a></li>
           </ul>
@@ -113,12 +141,10 @@
             </li>
             <li>
                <div>
-                <p>Type in a word to delete from the DB. </p>
-                <form id='delete_anagram'>
-                  <input class="uk-input" id="delete_anagram-input" type="text" placeholder="ex. bear">
-                  <p><input class="uk-checkbox" type="checkbox" id="delete-self-anagrams"> also delete its anagrams</p>
-                  <p class="uk-text-muted"><i>Deletion executes regardless of the presence of the word.</i></p>
-                  <button class="uk-button uk-button-danger uk-width-1-1">Delete</button>
+                <p>Find the words with anagrams greater than or equal the specified size.<br><b>0 will result words with most anagrams.</b></p>                  
+                <form id='get_anagrams'>
+                  <input class="uk-input" id="anagram_size-input" type="text" placeholder="ex : 8">
+                  <button class="uk-button uk-button-secondary uk-margin-small-top uk-width-1-1">Get Anaggrams</button>
                 </form>
               </div>
             </li>
@@ -130,6 +156,17 @@
               </div>
             </li>
             <li>
+               <div>
+                <p>Type in a word to delete from the DB. </p>
+                <form id='delete_anagram'>
+                  <input class="uk-input" id="delete_anagram-input" type="text" placeholder="ex. bear">
+                  <p><input class="uk-checkbox" type="checkbox" id="delete-self-anagrams"> also delete its anagrams</p>
+                  <p class="uk-text-muted"><i>Deletion executes regardless of the presence of the word.</i></p>
+                  <button class="uk-button uk-button-danger uk-width-1-1">Delete</button>
+                </form>
+              </div>
+            </li>
+            <li>
               <div>
                 <p>The database will be completely wiped out. You can rebuild the DB if you want to test further.</i></p>
                 <p class="uk-text-muted"><i>No turning back. :> </i></p>                
@@ -138,7 +175,7 @@
             </li>
             <li>
               <div>
-                <p>The database is already generated in <i><b>db.sql</b></i>. Rebuilding from <i><b>dictionary.txt</b></i> will reset everything. Data ingestion takes about 5-6 minutes depending on the speed of the computer.</p>
+                <p>The database is already generated in <i><b>db.sql</b></i>. Rebuilding from <i><b>dictionary.txt</b></i> will reset everything. Data ingestion takes about 5-10 minutes depending on the speed of the computer.</p>
                 <p class="uk-text-muted"><i>If you don't want to wait, rename <b>db_backup.sql</b> to <b>db.sql</b>.</i></p>                
                 <button class="uk-button uk-button-default uk-button-danger uk-width-1-1" onclick="generate()">Rebuild DB</button>
               </div>
@@ -153,6 +190,9 @@
           <textarea disabled id="result"></textarea>
           <div><span id="result-clear">x clear all</span></div>
         </div>          
+      </div>
+      <div class="uk-margin-small-top">
+        <p>Amos Gwa<br>amosgwa@gmail.com<br>7205795976</p>          
       </div>
   </div>
 </body>
@@ -257,7 +297,7 @@
       }
     })
 
-     // Check anagram
+    // Check anagram
     $('#check_anagram').on('submit', (e)=>{
       e.preventDefault()
 
@@ -273,7 +313,7 @@
       } else {
         toggleSpinner()
 
-        var url = `/anagrams/check.json`
+        var url = `/check.json`
         $.ajax(url, {
           method: 'POST',
           contentType: 'application/json; charset=utf-8',
@@ -289,6 +329,30 @@
           }
         })
       }
+    })
+
+    // Get anagram
+    $('#get_anagrams').on('submit', (e)=>{
+      e.preventDefault()
+
+      var anagram_size = $('#anagram_size-input').val()
+
+      toggleSpinner()
+      var url = `/anagrams/larger`
+      var params = `anagram_size=${anagram_size}`
+
+      $.ajax(url, {
+        method: 'GET',
+        data: params,
+        error(xhr) {
+          toggleSpinner()
+          parseResult(xhr.responseText, xhr)
+        },
+        success(data, status, xhr) {
+          toggleSpinner()
+          parseResult(data,xhr)
+        }
+      })
     })
 
     $("#result-clear").on('click', (e) => {
@@ -315,16 +379,20 @@
   function generate() {
     // Generate the anagrams from dictionary.txt.
     toggleSpinner()
+    // Fade in the message.
+    $( "#screen" ).fadeIn( "slow" );
     $.ajax('/generate',{
       method: 'GET',
       data: {
       }, 
       error(xhr) {
         toggleSpinner()
+        $( "#screen" ).fadeOut( "slow" );
         parseResult(xhr.responseText, xhr)
       },
       success(data, status, xhr) {
         toggleSpinner()
+        $( "#screen" ).fadeOut( "slow" );
         parseResult(data,xhr)
       }
     })

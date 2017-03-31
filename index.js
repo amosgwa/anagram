@@ -25,8 +25,9 @@ app.get('/', function (req, res) {
 // May take a long time based on the hard disk. Refer to server.timeout
 app.get('/generate', function (req, res) {
   // Create a collection.
-  console.log("Clicked generate")
-  db.generateDatabase('dictionary_short.txt',res)
+  console.log("Rebuilding from dictionary.")
+  //setTimeout(function(){res.send("DONE")},3000);  
+  db.generateDatabase('dictionary.txt',res)
 })
 
 // This is a hack. Trying to make the 
@@ -50,9 +51,15 @@ app.post('/words.json', jsonParser, function (req, res) {
   }  
 })
 
+// This is a hack. Trying to make the 
+// curl -i -X POST -d '{ "words": ["read", "dear", "dare"] }' command work.
+app.use('/check.json',(req, res, next) => {
+  req.headers["content-type"] = "application/json"
+  next()
+})
+
 // Check if the words are anagrams of themselves.
-app.post('/anagrams/check.json', jsonParser, function (req, res) {
-  // Return the words.
+app.post('/check.json', jsonParser, function (req, res) {
   var words = req.body["words"]
   var sorted_words = words.map((v)=> v.trim().split("").sort().join('').toLowerCase())
 
@@ -73,23 +80,33 @@ app.delete('/words.json', (req,res)=>{
 // This will NOT fail if no anagram is found.
 // The limit query from url can present or not.
 app.get('/anagrams/:word.json', (req, res)=>{
+  // Clean up the data.
   var word = req.params.word.trim()
-  var limit = req.query["limit"]
-  var filter_proper = req.query["filter_proper"] // This is either true or false(string)
-  db.getAnagrams(word, limit, filter_proper, res)
+  var limit = req.query["limit"] || ''
+  
+  var filter_proper = req.query["filter_proper"] || 'false' // This is either true or false(string)
+  console.log(limit, filter_proper)
+  db.findAnagrams(word, limit, filter_proper, res)
 })
 
 // Delete a particular word from the database.
 app.delete('/words/:word.json', (req,res)=>{
+  // Clean up the data.
   var word = req.params.word.trim()
-  var delete_self_anagrams = req.query["delete_self_anagrams"] // This is either true or false(string)
-  console.log(req.query)
+  var delete_self_anagrams = req.query["delete_self_anagrams"] || 'false' // This is either true or false(string)
   db.deleteWord(word, delete_self_anagrams, res)
 })
 
 // Returns count of words in the corpus and min/max/median/average word length.
 app.get('/anagrams/stats', (req,res) => {
   db.getStats(res)
+})
+
+// Find the anagram with more than the specified size.
+// Returns the words with most anagrams if no size is specified.
+app.get('/anagrams/larger', (req,res) => {
+  var anagram_size = req.query["anagram_size"] || ''
+  db.getAnagrams(anagram_size, res)
 })
 
 // Run the app on port 3000.

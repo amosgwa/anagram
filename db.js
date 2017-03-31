@@ -79,7 +79,7 @@ function _sql_db_add_words(words) {
   sql_db.parallelize(function () {
     var stmt = sql_db.prepare("INSERT OR IGNORE INTO anagram VALUES (?,?,?,?)");
     words.forEach(function (w) {
-      let sorted_word = w.split("").sort().join('').toLowerCase()
+      let sorted_word = w.toLowerCase().split("").sort().join('')
       let is_proper = (w[0] == w[0].toUpperCase()) ? 1 : 0 // Rule for proper noun : a word starting with a capital letter
       stmt.run(sorted_word, w, w.length, is_proper)
     })
@@ -87,7 +87,7 @@ function _sql_db_add_words(words) {
   });
 }
 
-function getAnagrams(word, limit, filter_proper, res) {
+function findAnagrams(word, limit, filter_proper, res) {
   var sorted_word = word.split('').sort().join('')
   var words = []
   var query = `SELECT word FROM anagram WHERE keyword='${sorted_word}' AND word<>'${word}'`
@@ -135,7 +135,7 @@ function addAnagrams(words, res) {
   sql_db.parallelize(function () {
     var stmt = sql_db.prepare("INSERT OR IGNORE INTO anagram VALUES (?,?,?,?)");
     words.forEach(function (w) {    
-      let sorted_word = w.split("").sort().join('').toLowerCase()
+      let sorted_word = w.toLowerCase().split("").sort().join('')
       let is_proper = (w[0] == w[0].toUpperCase()) ? 1 : 0 // Rule for proper noun : a word starting with a capital letter
       stmt.run(sorted_word, w, w.length, is_proper)
     })
@@ -160,11 +160,11 @@ function deleteWord(word, delete_self_anagrams, res) {
   var query = `DELETE FROM anagram WHERE word='${word}'`
 
   if(delete_self_anagrams == 'true'){
-    let sorted_word = word.split("").sort().join('').toLowerCase()
+    let sorted_word = word.toLowerCase().split("").sort().join('')
     query = `DELETE FROM anagram WHERE keyword='${sorted_word}'`
   }
 
-  console.log("Delete ", query)
+  //console.log("Delete ", query)
   sql_db.run(query, [], (err) => {
       if (err) {
         console.error(err)
@@ -243,9 +243,84 @@ function getStats(res) {
   sql_db.close()
 }
 
+// This is messy. Prob can be optimized. :>
+function getAnagrams(anagram_size, res) {
+  var words = []
+  var result = []
+
+  var query = `
+    SELECT tb1.keyword
+    FROM (SELECT keyword, COUNT(word) AS word_count 
+      FROM anagram
+      GROUP BY keyword) AS tb1,
+      (SELECT MAX(word_count) as max_count
+        FROM (SELECT COUNT(word) AS word_count 
+          FROM anagram
+          GROUP BY keyword)
+        ) AS tb2
+    WHERE tb1.word_count=tb2.max_count`
+
+  if(anagram_size != '' && anagram_size != 0) {
+    query = `
+    SELECT keyword
+      FROM (SELECT keyword, COUNT(word) AS word_count 
+        FROM anagram
+        GROUP BY keyword) AS tb1
+      WHERE tb1.word_count>=${anagram_size}`
+  }
+
+  // Open database.
+  sql_db = new sqlite3.Database('db.sql', sqlite3.OPEN_READWRITE)
+  sql_db.each(
+    query,
+    (err, row) => {
+      // Reading each row and append the result.
+      if (err) console.error(err)
+      else {
+        words.push(row.keyword)
+      }
+    }, (err, numRows) => {
+      // Completed.
+      if (err) {
+        console.error(err)
+        res.status(500).send("Database error at fetching a word with largest anagram.")
+      } else {
+        // We got the word with largest anagrams.
+        // Now query to get anagrams for each word.
+        // Run insertion of words in parallel.
+        sql_db.serialize(function () {
+          var stmt = sql_db.prepare(`SELECT word FROM anagram WHERE keyword=?`);
+          words.forEach(function (w) {    
+            var tmp = []
+            stmt.each(w, (err, row) => {
+              tmp.push(row.word)
+            })
+            result.push(tmp)
+          })
+          stmt.finalize();
+        });
+        sql_db.close((err, doc) => {
+          if (err) {
+            console.error(err)
+            res.status(500).send("Error getting largest Anagrams")
+          }
+          else {
+            var json_result = {
+              count: result.length,
+              anagrams : result
+            }
+            console.log(json_result)
+            res.status(200).send(json_result)
+          }
+        });
+      }
+    });
+}
+
 exports.generateDatabase = generateDatabase
-exports.getAnagrams = getAnagrams
+exports.findAnagrams = findAnagrams
 exports.addAnagrams = addAnagrams
 exports.deleteWord = deleteWord
 exports.deleteAllWords = deleteAllWords
 exports.getStats = getStats
+exports.getAnagrams = getAnagrams
