@@ -18,7 +18,7 @@ The app runs on node server, and you will need to install both [node and npm](ht
   ```
 - Testing in the broswer
   ```
-  http://localhost:300
+  http://localhost:3000
   ```
 ---
 # API End Points
@@ -144,3 +144,4 @@ ruby anagram_test.rb -h
   - I personally believe that mongo would have been a lot faster for searching in large data. We are dealing with a lot of strings, and I think Mongo is good for that. But, it was a pain to get it up and running. So yeah, finishing the project with less pain in timely manner is much more important here.
   - I am using Nodejs and Express because I wanted to learn something new. It took me about 12 videos on Nodejs and Express, and tons of googling. I learned a lot. It was fun!
   - I also built a web UI to run the test from the client side. I just wanted to see how it behaves from the client side. It also helped me see from the user perspective, and find bugs.
+  - Some of the SQL commands are nasty. I need to learn more. :)
